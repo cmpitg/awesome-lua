@@ -1,0 +1,41 @@
+-- {{{ Rules
+awful.rules.rules = {
+    -- All clients will match this rule.
+    { rule = { },
+      properties = { border_width = beautiful.border_width,
+                     border_color = beautiful.border_normal,
+                     focus = true,
+                     keys = clientkeys,
+                     buttons = clientbuttons } },
+    { rule = { class = "MPlayer" },
+      properties = { floating = true } },
+    { rule = { class = "pinentry" },
+      properties = { floating = true } },
+    { rule = { class = "Gimp" },
+      properties = { floating = true,
+                     tag = tags[mouse.screen][8] } },
+    { rule = { class = "Cinelerra" },
+      properties = { floating = true,
+                     tag = tags[mouse.screen][8] } },
+    { rule = { class = "Office" },
+      properties = { floating = true,
+                     tag = tags[mouse.screen][3] } },
+    { rule = { class = "gmrun" },
+      properties = { floating = true } },
+    -- Set Firefox to always map on tags number 2 of screen 1.
+    { rule = { class = "Firefox" },
+      properties = { tag = tags[mouse.screen][2] } },
+    { rule = { class = "Seamonkey" },
+      properties = { tag = tags[mouse.screen][2] } },
+    { rule = { class = "Flock" },
+      properties = { tag = tags[mouse.screen][2] } },
+    { rule = { class = "Pidgin" },
+      properties = { tag = tags[mouse.screen][4] } },
+    { rule = { class = "Skype" },
+      properties = { tag = tags[mouse.screen][4] } },
+    { rule = { class = "Kdenlive" },
+      properties = { tag = tags[mouse.screen][8] } },
+    { rule = { class = "Nautilus" },
+      properties = { tag = tags[mouse.screen][7] } }
+}
+-- }}}
