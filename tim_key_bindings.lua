@@ -1,6 +1,43 @@
 -- Require for building menu
 require("tim_menu")
 
+-- Require for expose-like: revelation
+require("revelation")
+
+-- Wibox
+require("tim_wibox")
+
+--
+-- These are the factors for "centralizing" a windowe.
+-- Change these according to your need.
+--
+local width_factor = 7 / 8
+local height_factor = 7 / 8
+local taskbar_height = 25
+
+-- My wibox
+timwibox = mywibox
+
+--
+-- ALSA Stuff
+--
+local volume_percent = "2%"
+
+function tim_amixer_change_vol(control, percent)
+   awful.util.spawn("amixer sset " .. control .. " " .. percent)
+end
+
+function tim_amixer_show_vol()
+   -- naughty.notify({ text = "Hello world",
+   --                  title = "Volume",
+   --                  fg = "#ffggcc",
+   --                  bg = "#bbggcc",
+   --                  ontop = true
+   --               })
+--   local msg = "naughty.notify({ text = \" echo $(tim_getvol) \", title = \"Volume\", fg = \"ffggcc\", bg = \"#bbggcc\",  ontop = true }) | awesome-client"
+  -- awful.util.spawn_with_shell("echo " .. msg)
+end
+
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
    --
@@ -9,11 +46,11 @@ globalkeys = awful.util.table.join(
    -- Previous tag
    -- awful.key({ modkey,           }, "Left",
    -- awful.tag.viewprev       ),
-   awful.key({ "Mod1", "Shift"   }, "Left",
+   awful.key({ modkey, "Mod1"   }, "Left",
              awful.tag.viewprev       ),
    -- Next tag
    -- awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
-   awful.key({ "Mod1", "Shift"   }, "Right",
+   awful.key({ modkey, "Mod1"   }, "Right",
              awful.tag.viewnext       ),
    -- Quick jump
    awful.key({ modkey,           }, "Escape",
@@ -33,7 +70,7 @@ globalkeys = awful.util.table.join(
                 awful.client.focus.byidx(-1)
                 if client.focus then client.focus:raise() end
              end),
-   
+
    --
    -- Layout manipulation
    --
@@ -70,13 +107,33 @@ globalkeys = awful.util.table.join(
                 local cmenu = awful.menu.clients({ width=400 },
                                                  { keygrabber=true })
              end),
-   
+   -- Toggle unminimize all
+   awful.key({ modkey            }, "n",
+             function ()
+                local all_clients = client.get(mouse.screen)
+                for _, c in ipairs(all_clients) do
+                   if c.minimized and c:tags()[mouse.screen] == awful.tag.selected(mouse.screen) then
+                      c.minimize = false
+                      client.focus = c
+                      c:raise()
+                      return
+                   end
+                end
+             end),
+   -- Toggle wibox visible
+   awful.key({ modkey             }, "v",
+             function ()
+                local status = timwibox[mouse.screen].visible
+                timwibox[mouse.screen].visible = not status
+             end
+          ),
+
    --
    -- Standard commands
    --
    -- awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
    -- Restart awesome
-   awful.key({ modkey, "Control" }, "r", awesome.restart),
+   awful.key({ modkey, "Control" }, "r", rodentbane.start),
    awful.key({ "Mod1", "Control" }, "r", awesome.restart),
    -- Quit awesome
    awful.key({ modkey, "Shift", "Control" }, "q", awesome.quit),
@@ -104,13 +161,56 @@ globalkeys = awful.util.table.join(
    -- Previous layout
    awful.key({ modkey, "Shift"   }, "space",
              function () awful.layout.inc(layouts, -1) end),
-   
+   -- Do revelation
+   awful.key({ modkey, "Control" }, "e", revelation.revelation),
+   -- Mouse click
+   awful.key({ modkey, "Mod1", "Shift" }, "space",
+             function () awful.util.spawn("xte 'mouseclick 3'") end),
+
+   --
+   -- System commands
+   --
+   -- Sleep
+   awful.key({ }, "XF86Sleep",
+             function () awful.util.spawn("xlock") end),
+   -- Lock screen
+   awful.key({ "Mod1", "Control"   }, "l",
+             function () awful.util.spawn("xlock") end),
+   -- Hibernate
+   awful.key({ modkey, "Mod1", "Control" }, "h",
+             function () awful.util.spawn("terminal -e 'hibernate'") end),
+   -- Suspend
+   awful.key({ modkey, "Mod1", "Control" }, "s",
+             function () awful.util.spawn("terminal -e 'hibernate-ram'") end),
+   -- Lock screen
+   awful.key({ modkey, "Mod1", "Control" }, "l",
+             function () awful.util.spawn("xlock") end),
+   -- Increase volume
+   awful.key({  }, "XF86AudioRaiseVolume",
+             function ()
+                tim_amixer_change_vol("Master playback", volume_percent .. "+")
+                tim_amixer_show_vol()
+             end),
+   -- Decrease volume
+   awful.key({  }, "XF86AudioLowerVolume",
+             function ()
+                tim_amixer_change_vol("Master playback", volume_percent .. "-")
+                tim_amixer_show_vol()
+             end),
+   -- Toggle mute
+   awful.key({  }, "XF86AudioMute",
+             function ()
+                awful.util.spawn("amixer sset Master toggle")
+             end
+          ),
+
+
    --
    -- Custom programs
    --
-   -- Mutt email client
+   -- Email client
    awful.key({ "Mod1", "Shift", "Control" }, "m" ,
-             function () awful.util.spawn("/home/cmpitg/bin/mutt") end),
+             function () awful.util.spawn("/home/cmpitg/bin/run_alpine") end),
    -- Stardict
    awful.key({ "Mod1", "Shift", "Control" }, "d" ,
              function () awful.util.spawn("stardict") end),
@@ -119,10 +219,31 @@ globalkeys = awful.util.table.join(
              function () awful.util.spawn(terminal) end),
    -- File manager
    awful.key({  }, "Help",
-             function () awful.util.spawn("nautilus") end),
+             function () awful.util.spawn("tim_guifilebrowser") end),
    -- GNOME system monitor
-   awful.key({ "Mod1" }, "Pause",
+   awful.key({ "Mod1", "Control" }, "Pause",
              function () awful.util.spawn("gnome-system-monitor") end),
+   -- File manager
+   awful.key({ "Mod1", "Control", "Shift" }, "b",
+             function () awful.util.spawn("tim_guifilebrowser") end),
+   -- Mozilla Firefox
+   awful.key({ "Mod1", "Control", "Shift" }, "f",
+             function () awful.util.spawn("firefox -no-remote") end),
+   -- Chromium-bin
+   awful.key({ "Mod1", "Control", "Shift" }, "c",
+             function () awful.util.spawn("chromium") end),
+   -- OpenOffice.org
+   awful.key({ "Mod1", "Control", "Shift" }, "o",
+             function () awful.util.spawn("ooffice") end),
+   -- Editor
+   awful.key({ "Mod1", "Control", "Shift" }, "e",
+             function () awful.util.spawn("tim_edit") end),
+   -- GNOME Alsamixer
+   awful.key({ "Mod1", "Control", "Shift" }, "a",
+             function () awful.util.spawn("gnome-alsamixer") end),
+   -- Downloader
+   awful.key({ "Mod1", "Control", "Shift" }, "j",
+             function () awful.util.spawn("jd.sh") end),
    
    --
    -- Prompt commands
@@ -146,6 +267,18 @@ globalkeys = awful.util.table.join(
 --
 -- Client keybindings for each window
 --
+-- Centralize a window
+function tim_centralize(c)
+   local current_geometry = screen[c.screen].geometry
+   local new_width = current_geometry.width * width_factor
+   local new_height = current_geometry.height * height_factor
+   local new_x = (current_geometry.width - new_width) / 2
+   local new_y = ((current_geometry.height - taskbar_height) - new_height) / 2
+   return { new_width = new_width,
+            new_height = new_height,
+            new_x = new_x, new_y = new_y }
+end
+--
 clientkeys = awful.util.table.join(
    -- Fullscreen
    awful.key({ modkey,           }, "f",
@@ -166,7 +299,7 @@ clientkeys = awful.util.table.join(
    awful.key({ modkey, "Shift"   }, "r",
              function (c) c:redraw()                       end),
    -- Toggle minimize
-   awful.key({ modkey,           }, "n",
+   awful.key({ modkey,           }, "i",
              function (c) c.minimized = not c.minimized    end),
    -- Toggle maximize
    awful.key({ modkey,           }, "m",
@@ -185,26 +318,26 @@ clientkeys = awful.util.table.join(
                 awful.client.moveresize(0, 0, -20, -20)
              end),
    -- Increase transparency
-   awful.key({ modkey, "Mod1", "Control", "Shift" }, "Down",
+   awful.key({ modkey, "Mod1", "Shift" }, "Down",
              function (c)
-                if c.opacity > 0 then
-                   c.opacity = c.opacity - 5
+                if c.opacity >= 0.10 then
+                   c.opacity = c.opacity - 0.10
                 end
              end),
    -- Decrease transparency
-   awful.key({ modkey, "Mod1", "Control", "Shift" }, "Up",
+   awful.key({ modkey, "Mod1", "Shift" }, "Up",
              function (c)
-                if c.opacity < 100 then
-                   c.opacity = c.opacity + 5
+                if c.opacity <= 0.90 then
+                   c.opacity = c.opacity + 0.10
                 end
              end),
    -- Change transparency to an acceptable number
-   awful.key({ modkey, "Mod1", "Shift" }, "Down",
+   awful.key({ modkey, "Mod1", "Shift" }, "Next",
              function (c)
                 c.opacity = 0.70
              end),
    -- Restore opacity
-   awful.key({ modkey, "Mod1", "Shift" }, "Up",
+   awful.key({ modkey, "Mod1", "Shift" }, "Prior",
              function (c)
                 c.opacity = 1
              end),
@@ -217,7 +350,16 @@ clientkeys = awful.util.table.join(
                    tag:clients()[i]:redraw()
                 end
              end
-          )
+          ),
+   -- Centralize the focused client window
+   awful.key({ modkey, "Control"          }, "End",
+             function (c)
+                local tmp = tim_centralize(c)
+                c:geometry({ x = tmp.new_x, y = tmp.new_y,
+                             width = tmp.new_width, height = tmp.new_height })
+                -- awful.client.property.set(c, "geometry", { width=800, height=600 })
+             end)
+
 )
 
 --
@@ -282,16 +424,17 @@ end
 --    awful.key({ "Mod1", "Control", "Shift" }, "Right",
 --              timMoveClientNextTag))
 
-timTagsInitial = { "m", "w", "o", "i", "a", "c", "b", "g", "t" }
+timTagsInitial = { "m", "w", "o", "i", "a", "c", "b", "g", "r", "t" }
+timTagsNum = 10
 
-for i = 1, 9 do
+for i = 1, timTagsNum do
    globalkeys = awful.util.table.join(
       globalkeys,
       -- Switch to tag
       awful.key({ modkey, "Mod1" }, timTagsInitial[i],
                 timTagViewOnly(mouse.screen, i)),
       -- View tag
-      awful.key({ modkey, "Control", "Mod1" }, timTagsInitial[i],
+      awful.key({ modkey, "Shift" }, timTagsInitial[i],
                 timTagViewToggle(mouse.screen, i)),
       -- Move to tag
       awful.key({ modkey, "Shift", "Mod1" }, timTagsInitial[i],
@@ -301,19 +444,20 @@ for i = 1, 9 do
                 timToggleTag(i))
    )
 end
-for i = 1, keynumber do
-   globalkeys = awful.util.table.join(
-      globalkeys,
-      -- Switch to tag
-      awful.key({ modkey }, "F" .. i,
-                timTagViewOnly(mouse.screen, i)),
-      -- Toggle tag view
-      awful.key({ modkey, "Control" }, "F" .. i,
-                timTagViewToggle(mouse.screen, i)),
-      -- Move client to tag
-      awful.key({ modkey, "Shift" }, "F" .. i,
-                timMoveClientToTag(i)),
-      -- Toggle tag
-      awful.key({ modkey, "Control", "Shift" }, "F" .. i,
-                timToggleTag(i)))
-end
+
+-- for i = 1, keynumber do
+--    globalkeys = awful.util.table.join(
+--       globalkeys,
+--       -- Switch to tag
+--       awful.key({ modkey }, "F" .. i,
+--                 timTagViewOnly(mouse.screen, i)),
+--       -- Toggle tag view
+--       awful.key({ modkey, "Control" }, "F" .. i,
+--                 timTagViewToggle(mouse.screen, i)),
+--       -- Move client to tag
+--       awful.key({ modkey, "Shift" }, "F" .. i,
+--                 timMoveClientToTag(i)),
+--       -- Toggle tag
+--       awful.key({ modkey, "Control", "Shift" }, "F" .. i,
+--                 timToggleTag(i)))
+-- end

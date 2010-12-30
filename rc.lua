@@ -23,19 +23,22 @@ require("beautiful")
 require("naughty")
 
 -- Load Debian menu entries
-require("debian.menu")
+-- require("debian.menu")
 
 -- Load vicious widget library
-require("vicious")
+-- require("vicious")
 
--- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
-beautiful.init("/usr/share/awesome/themes/default/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/themes/default/theme.lua")
+
 
 -- This is used later as the default terminal and editor to run.
-terminal = "x-terminal-emulator"
+-- terminal = "x-terminal-emulator"
 -- editor = os.getenv("EDITOR") or "editor"
-editor = "/home/cmpitg/bin/TIM_edit"
+-- terminal = "roxterm"
+-- terminal = "/usr/bin/terminal"
+terminal = "/home/cmpitg/bin/tim_terminal"
+editor = "/home/cmpitg/bin/tim_edit"
 editor_cmd = terminal .. " -e " .. editor
 
 -- Default modkey.
@@ -65,12 +68,18 @@ layouts =
 
 require("tim_tag_names")
 
+require("tim_theme")
 require("tim_menu")
-require("tim_wibox")
 require("tim_global_mouse_bindings")
-require("tim_key_bindings")
 require("tim_client_mouse_bindings")
+
+-- Rodentbane for mouse controlling from keyboard
+require("rodentbane")
+
+require("tim_wibox")
+require("tim_key_bindings")
 require("tim_custom_functions")
+
 
 --
 -- Set keys
@@ -81,4 +90,13 @@ root.keys(globalkeys)
 
 require("tim_client_rules")
 require("tim_signals")
-require("tim_autorun")
+--awful.util.spawn("/usr/bin/nm-applet --sm-disable &")
+awful.util.spawn("/home/cmpitg/bin/tim_xdmautostart")
+
+-- require("tim_autorun")
+
+-- Set desktop background
+-- awful.util.spawn("/home/cmpitg/bin/tim_setbg")
+
+-- Testing stuff
+-- require("tim_test")

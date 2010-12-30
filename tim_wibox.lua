@@ -1,19 +1,22 @@
+--require("obvious.volume_alsa")
+require("vicious")
+
 -- {{{ Wibox
 -- Create a textclock widget
 -- mytextclock = awful.widget.textclock({ align = "right" },
 --                                      "%a %b %d, %H:%M:%S", 1)
+--
 mytextclock = awful.widget.textclock({ align = "right" },
                                      "%a %Y/%m/%d, %H:%M:%S", 1)
 
+--
 -- Create a systray
+--
 mysystray = widget({ type = "systray" })
 
 --
 -- Create a wibox for each screen and add it
 --
--- Create my battery status
---
-
 mywibox = {}
 mypromptbox = {}
 mylayoutbox = {}
@@ -52,6 +55,23 @@ mytasklist.buttons = awful.util.table.join(
                            if client.focus then client.focus:raise() end
                         end))
 
+--
+-- Additional widgets
+--
+-- Battery status widget
+battery_textbox = widget({ type = "textbox" })
+battery_textbox.text = "Hello world"
+require("tim_battery")
+bat = tim_battery.battery_closure("BAT1")
+battery_textbox.text = bat()
+battery_timer = timer({ timeout = 10 })
+battery_timer:add_signal("timeout", function () battery_textbox.text = bat() end)
+battery_timer:start()
+-- Volume display widget
+volume_display = widget({ type = "textbox" })
+vicious.register(volume_display, vicious.widgets.volume,
+                 "<span color='green'>$1$2</span> ", 0.5, "Master")
+
 for s = 1, screen.count() do
    -- Create a promptbox for each screen
    mypromptbox[s] = awful.widget.prompt({ layout = awful.widget.layout.horizontal.leftright })
@@ -76,8 +96,12 @@ for s = 1, screen.count() do
                                          end, mytasklist.buttons)
 
    -- Create the wibox
-   mywibox[s] = awful.wibox({ position = "top", screen = s })
+   mywibox[s] = awful.wibox({ position = "bottom", screen = s })
+
+   --
    -- Add widgets to the wibox - order matters
+   -- If you want to add your widget to the wibox, add it here
+   --
    mywibox[s].widgets = {
       {
          mylauncher,
@@ -87,6 +111,8 @@ for s = 1, screen.count() do
       },
       mylayoutbox[s],
       mytextclock,
+      volume_display,
+      battery_textbox,
       s == 1 and mysystray or nil,
       mytasklist[s],
       layout = awful.widget.layout.horizontal.rightleft

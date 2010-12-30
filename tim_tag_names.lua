@@ -10,7 +10,7 @@ tags = {
    -- names = { "main", "www", "office", "im", "back", "coding",
    --        "browser", "graphics", "tmp" },
    names = { "m", "w", "o", "i", "a", "c",
-          "b", "g", "t" },
+          "b", "g", "r", "t" },
    layout = {  }
 }
 for s = 1, screen.count() do
