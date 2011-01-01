@@ -16,7 +16,15 @@ local height_factor = 7 / 8
 local taskbar_height = 25
 
 -- My wibox
-timwibox = mywibox
+wiboxes = wiboxes
+
+--
+-- Wibox stuff
+--
+function wibox_toggle_visible(timwibox)
+   local status = timwibox[mouse.screen].visible
+   timwibox[mouse.screen].visible = not status
+end
 
 --
 -- ALSA Stuff
@@ -123,8 +131,8 @@ globalkeys = awful.util.table.join(
    -- Toggle wibox visible
    awful.key({ modkey             }, "v",
              function ()
-                local status = timwibox[mouse.screen].visible
-                timwibox[mouse.screen].visible = not status
+                wibox_toggle_visible(wiboxes['bottom'])
+                wibox_toggle_visible(wiboxes['top'])
              end
           ),
 

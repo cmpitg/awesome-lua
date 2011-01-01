@@ -80,7 +80,6 @@ require("tim_wibox")
 require("tim_key_bindings")
 require("tim_custom_functions")
 
-
 --
 -- Set keys
 --
