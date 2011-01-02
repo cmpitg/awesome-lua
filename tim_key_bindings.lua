@@ -141,7 +141,7 @@ globalkeys = awful.util.table.join(
    --
    -- awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
    -- Restart awesome
-   awful.key({ modkey, "Control" }, "r", rodentbane.start),
+   --awful.key({ modkey, "Control" }, "r", rodentbane.start),
    awful.key({ "Mod1", "Control" }, "r", awesome.restart),
    -- Quit awesome
    awful.key({ modkey, "Shift", "Control" }, "q", awesome.quit),

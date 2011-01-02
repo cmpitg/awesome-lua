@@ -52,7 +52,7 @@ end
 
 function get_next_limit(num)
    local ind = 1
-   for ind = 1, limits_num do
+   for ind = 1, #limits - 1 do
       local pair = limits[ind]
       lim = pair[1]
       step = pair[2]
@@ -74,6 +74,7 @@ function battery_closure(adapter)
    return function ()
              local prefix = "⚡"
              local battery, stat = get_battery_status(adapter)
+             nextlim = nextlim or 20
              if stat:match("€") then
                 if battery <= nextlim then
                    naughty.notify({ title = "⚡ Beware! ⚡",

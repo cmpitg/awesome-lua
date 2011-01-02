@@ -76,8 +76,9 @@ require("tim_client_mouse_bindings")
 require("tim_wibox")
 
 -- Rodentbane for mouse controlling from keyboard
---local rd = require 'rodentbane'
---rd.bind_default
+local rd = require 'rodentbane'
+--rd.init()
+rd.bind_default()
 
 require("tim_key_bindings")
 require("tim_custom_functions")

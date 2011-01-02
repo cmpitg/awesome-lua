@@ -4,10 +4,14 @@
 
 theme = {}
 
-theme.font          = "sans 8"
+--theme.font          = "sans 8"
+theme.font          = "Tahoma 8.5"
+--theme.font          = "Arial 9"
+--theme.font          = "Monaco 9"
 
 theme.bg_normal     = "#222222"
-theme.bg_focus      = "#535d6c"
+--theme.bg_focus      = "#535d6c"
+theme.bg_focus      = "#606060"
 theme.bg_urgent     = "#ff0000"
 theme.bg_minimize   = "#444444"
 
