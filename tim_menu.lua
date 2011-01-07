@@ -19,6 +19,7 @@ mylauncher = awful.widget.launcher({ image = image(beautiful.awesome_icon),
                                      menu = mymainmenu })
 
 globalkeys = awful.util.table.join(
+   globalkeys,
    -- Invoke menu
    awful.key({ modkey,           }, "Menu",
              function () mymainmenu:show(true)        end),
