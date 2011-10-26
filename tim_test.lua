@@ -1,0 +1,14 @@
+-- awful.hooks.property.register(function (c, prop)
+--   -- Remove the titlebar if fullscreen
+--   if c.fullscreen then
+--      awful.titlebar.remove(c)
+--   elseif not c.fullscreen then
+--     -- Add title bar for floating apps
+--     if c.titlebar == nil and awful.client.floating.get(c) then
+--        awful.titlebar.add(c, { modkey = modkey })
+--     -- Remove title bar, if it's not floating
+--     elseif c.titlebar and not awful.client.floating.get(c) then
+--        awful.titlebar.remove(c)
+--     end
+--   end
+-- end)

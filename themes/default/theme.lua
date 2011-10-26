@@ -5,15 +5,21 @@
 theme = {}
 
 --theme.font          = "sans 8"
-theme.font          = "Tahoma 8.5"
+--theme.font          = "Tahoma 8.5"
+--theme.font          = "Droid Sans 9"
+--theme.font          = "Droid Sans Japanese Bold 9"
+theme.font          = "Droid Sans Bold 10"
 --theme.font          = "Arial 9"
 --theme.font          = "Monaco 9"
 
+-- theme.bg_normal     = "#222222"
+theme.bg_normal     = "#5a0049"
 theme.bg_normal     = "#222222"
 --theme.bg_focus      = "#535d6c"
-theme.bg_focus      = "#606060"
+theme.bg_focus      = "#828282"
 theme.bg_urgent     = "#ff0000"
-theme.bg_minimize   = "#444444"
+-- theme.bg_minimize   = "#444444"
+theme.bg_minimize   = "#007880"
 
 theme.fg_normal     = "#aaaaaa"
 theme.fg_focus      = "#ffffff"
@@ -45,8 +51,8 @@ theme.tasklist_floating_icon = "/usr/share/awesome/themes/default/tasklist/float
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
 theme.menu_submenu_icon = "/usr/share/awesome/themes/default/submenu.png"
-theme.menu_height = "15"
-theme.menu_width  = "100"
+theme.menu_height = "20"
+theme.menu_width  = "200"
 
 -- You can add as many variables as
 -- you wish and access them by using

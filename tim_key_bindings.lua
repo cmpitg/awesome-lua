@@ -1,3 +1,16 @@
+function tim_tag_notify(title, msg)
+   naughty.notify({ text = msg,
+                    title = title,
+                    fg = "#ffggcc",
+                    bg = "#bbggcc",
+                    ontop = false,
+                    timeout = 1 })
+end
+
+function runApp(cmd)
+   return function () awful.util.spawn(cmd) end
+end
+
 -- Require for building menu
 require("tim_menu")
 
@@ -8,11 +21,31 @@ require("revelation")
 require("tim_wibox")
 
 --
+-- Application shortcuts, defined for key grabbing
+--
+
+appKeys = {
+   e = runApp("tim_edit"),
+   m = runApp("run_alpine"),
+   d = runApp("stardict"),
+   r = runApp("gksudo emacs"),
+   t = runApp("thunar"),
+   i = runApp("tim_im"),
+   b = runApp("tim_guifilebrowser"),
+   n = runApp("nautilus"),
+   f = runApp("firefox -no-remote"),
+   c = runApp("chromium"),
+   o = runApp("libreoffice"),
+   a = runApp("gnome-alsamixer"),
+   u = runApp("aurora")
+}
+
+--
 -- These are the factors for "centralizing" a windowe.
 -- Change these according to your need.
 --
-local width_factor = 7 / 8
-local height_factor = 7 / 8
+local width_factor = 8 / 9
+local height_factor = 8 / 9
 local taskbar_height = 25
 
 -- My wibox
@@ -89,16 +122,16 @@ globalkeys = awful.util.table.join(
    --
    -- Layout manipulation
    --
+   awful.key({ modkey, "Control" }, "l",
+             function () awful.screen.focus_relative( 1) end),
+   awful.key({ modkey, "Control" }, "h",
+             function () awful.screen.focus_relative(-1) end),
    -- Swap previous
    awful.key({ modkey, "Shift"   }, "k",
              function () awful.client.swap.byidx(  1)    end),
    -- Swap next
    awful.key({ modkey, "Shift"   }, "j",
              function () awful.client.swap.byidx( -1)    end),
-   awful.key({ modkey, "Control" }, "k",
-             function () awful.screen.focus_relative( 1) end),
-   awful.key({ modkey, "Control" }, "j",
-             function () awful.screen.focus_relative(-1) end),
    -- Jump the 'main'
    awful.key({ modkey, }, "$",
              function () awful.tag.viewonly(tags[mouse.screen][1]) end),
@@ -188,15 +221,12 @@ globalkeys = awful.util.table.join(
    -- Sleep
    awful.key({ }, "XF86Sleep",
              function () awful.util.spawn("xlock") end),
-   -- Lock screen
-   awful.key({ "Mod1", "Control"   }, "l",
-             function () awful.util.spawn("xlock") end),
    -- Hibernate
    awful.key({ modkey, "Mod1", "Control" }, "h",
-             function () awful.util.spawn("terminal -e 'hibernate'") end),
+             function () awful.util.spawn("xterm -e 'sudo hibernate'") end),
    -- Suspend
    awful.key({ modkey, "Mod1", "Control" }, "s",
-             function () awful.util.spawn("terminal -e 'hibernate-ram'") end),
+             function () awful.util.spawn("xterm -e 'sudo hibernate-ram'") end),
    -- Lock screen
    awful.key({ modkey, "Mod1", "Control" }, "l",
              function () awful.util.spawn("xlock") end),
@@ -222,43 +252,84 @@ globalkeys = awful.util.table.join(
    --
    -- Custom programs
    --
-   -- Email client
-   awful.key({ "Mod1", "Shift", "Control" }, "m" ,
-             function () awful.util.spawn("/home/cmpitg/bin/run_alpine") end),
-   -- Stardict
-   awful.key({ "Mod1", "Shift", "Control" }, "d" ,
-             function () awful.util.spawn("stardict") end),
-   -- Terminal
-   awful.key({ "Mod1", "Control", "Shift" }, "Insert",
-             function () awful.util.spawn(terminal) end),
-   -- File manager
-   awful.key({  }, "Help",
-             function () awful.util.spawn("tim_guifilebrowser") end),
+   awful.key({ modkey }, "Return",
+             function (c)
+                keygrabber.run(
+                   function (mod, key, event)
+                      if string.find(key, "Super") then
+                         tim_tag_notify(
+                            "Application mode",
+                            "Press a key to start an application...")
+                      end
+
+                      if event == "release" then
+                         return true
+                      end
+
+                      if not string.find(key, "Shift") then
+                         keygrabber.stop()
+                      end
+
+                      if appKeys[key] then
+                         appKeys[key]()
+                      end
+                      return true
+                   end
+                )
+             end),
+
+
+   -- -- Email client
+   -- awful.key({ "Mod1", "Shift", "Control" }, "m" ,
+   --           function () awful.util.spawn("/home/cmpitg/bin/run_alpine") end),
+   -- -- Stardict
+   -- awful.key({ "Mod1", "Shift", "Control" }, "d" ,
+   --           function () awful.util.spawn("stardict") end),
+   -- -- Stardict
+   -- awful.key({ "Mod1", "Shift", "Control" }, "r" ,
+   --           function () awful.util.spawn("gksudo emacs") end),
+   -- -- Terminal
+   -- awful.key({ "Mod1", "Control", "Shift" }, "t",
+   --           function () awful.util.spawn(terminal) end),
+   -- -- Terminator
+   -- awful.key({ "Mod1", "Control", "Shift" }, "Insert",
+   --           function () awful.util.spawn("terminator") end),
+
+   -- -- File manager
+   -- awful.key({  }, "Help",
+   --           function () awful.util.spawn("tim_guifilebrowser") end),
+   -- -- Instant Messenger
+   -- awful.key({ "Mod1", "Control", "Shift" }, "i",
+   --           function () awful.util.spawn("tim_im") end),
+
    -- GNOME system monitor
    awful.key({ "Mod1", "Control" }, "Pause",
-             function () awful.util.spawn("gnome-system-monitor") end),
-   -- File manager
-   awful.key({ "Mod1", "Control", "Shift" }, "b",
-             function () awful.util.spawn("tim_guifilebrowser") end),
-   -- Mozilla Firefox
-   awful.key({ "Mod1", "Control", "Shift" }, "f",
-             function () awful.util.spawn("firefox -no-remote") end),
-   -- Chromium-bin
-   awful.key({ "Mod1", "Control", "Shift" }, "c",
-             function () awful.util.spawn("chromium") end),
-   -- OpenOffice.org
-   awful.key({ "Mod1", "Control", "Shift" }, "o",
-             function () awful.util.spawn("ooffice") end),
-   -- Editor
-   awful.key({ "Mod1", "Control", "Shift" }, "e",
-             function () awful.util.spawn("tim_edit") end),
-   -- GNOME Alsamixer
-   awful.key({ "Mod1", "Control", "Shift" }, "a",
-             function () awful.util.spawn("gnome-alsamixer") end),
-   -- Downloader
-   awful.key({ "Mod1", "Control", "Shift" }, "j",
-             function () awful.util.spawn("jd.sh") end),
-   
+             function() runApp("gnome-system-monitor")() end),
+   -- Quick terminal
+   awful.key({ modkey }, "\\",
+             function() runApp(terminal)() end),
+   -- -- File manager
+   -- awful.key({ "Mod1", "Control", "Shift" }, "b",
+   --           function () awful.util.spawn("tim_guifilebrowser") end),
+   -- -- Mozilla Firefox
+   -- awful.key({ "Mod1", "Control", "Shift" }, "f",
+   --           function () awful.util.spawn("firefox -no-remote") end),
+   -- -- Chromium-bin
+   -- awful.key({ "Mod1", "Control", "Shift" }, "c",
+   --           function () awful.util.spawn("chromium") end),
+   -- -- OpenOffice.org
+   -- awful.key({ "Mod1", "Control", "Shift" }, "o",
+   --           function () awful.util.spawn("libreoffice") end),
+   -- -- Editor
+   -- awful.key({ "Mod1", "Control", "Shift" }, "e",
+   --           function () awful.util.spawn("tim_edit") end),
+   -- -- GNOME Alsamixer
+   -- awful.key({ "Mod1", "Control", "Shift" }, "a",
+   --           function () awful.util.spawn("gnome-alsamixer") end),
+   -- -- Downloader
+   -- awful.key({ "Mod1", "Control", "Shift" }, "j",
+   --           function () awful.util.spawn("jd.sh") end),
+
    --
    -- Prompt commands
    --
@@ -266,7 +337,7 @@ globalkeys = awful.util.table.join(
    awful.key({ modkey },            "r",
              function () mypromptbox[mouse.screen]:run() end),
    -- Run program with gmrun
-   awful.key({ "Mod1" }, "Escape",
+   awful.key({ "Control" }, "Escape",
               function () awful.util.spawn("gmrun") end),
    -- Eval Run code
    awful.key({ modkey, "Control" }, "x",

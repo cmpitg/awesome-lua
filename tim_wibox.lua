@@ -29,6 +29,7 @@ mytasklist = {}
 titlebar = {}
 buttery_textbox = {}
 volume_display = {}
+meminfo = {}
 
 --
 -- Mouse buttons for taglist
@@ -83,6 +84,49 @@ function battery_widget_init()
    battery_timer:start()
 end
 
+--
+-- Memory info
+--
+
+-- function update_ram_status()
+--    local active, total
+--    for line in io.lines('/proc/meminfo') do
+--       for key, value in string.gmatch(line, "(%w+):\ +(%d+).+") do
+--          if key == "Active" then active = tonumber(value)
+--          elseif key == "MemTotal" then total = tonumber(value) end
+--       end
+--    end
+--    return string.format("<span color='green'>%.2f M / %.2f M</span> ",
+--                         active / 1024, total / 1024)
+-- end
+
+-- function meminfo_init()
+--    meminfo = widget({ type = "textbox", align = "right" })
+--    awful.hooks.timer.register(7, function() meminfo.text = update_ram_status() end)
+-- end
+
+function meminfo_init()
+   meminfo = widget({ type = "textbox" })
+   require("vicious")
+   vicious.register(meminfo, vicious.widgets.mem,
+                    "<span color='cyan'>$1% ($2MB / $3MB)</span> ", 7)
+end
+
+-- function meminfo_init()
+--    -- Initialize widget
+--    meminfo = awful.widget.progressbar()
+--    -- Progressbar properties
+--    meminfo:set_width(25)
+--    meminfo:set_height(15)
+--    meminfo:set_vertical(true)
+--    meminfo:set_background_color("#494B4F")
+--    meminfo:set_border_color(nil)
+--    meminfo:set_color("#AECF96")
+--    meminfo:set_gradient_colors({ "#AECF96", "#88A175", "#FF5656" })
+--    -- Register widget
+--    vicious.register(meminfo, vicious.widgets.mem, "$1 ", 13)
+-- end
+
 function volume_widget_init()
    volume_display = widget({ type = "textbox" })
    require("vicious")
@@ -123,6 +167,7 @@ function tasklist_init(s)
       function(c)
          return awful.widget.tasklist.label.currenttags(c, s)
       end, mytasklist.buttons)
+
    -- Create a title bar
    titlebar[s] = awful.widget.tasklist(
       function(c)
@@ -131,18 +176,25 @@ function tasklist_init(s)
 end
 
 function wibox_bottom_init(s)
-   wibox_bottom[s] = awful.wibox({ position = "bottom", screen = s })
+   wibox_bottom[s] = awful.wibox({ position = "bottom",
+                                   height = 20,
+                                   screen = s })
+   -- wibox_bottom[s] = awful.wibox({ position = "left",
+   --                                 align = "right",
+   --                                 height = "96%",
+   --                                 screen = s })
    wibox_bottom[s].widgets = {
       {
          mylauncher,
          layout = awful.widget.layout.horizontal.leftright
       },
       mylayoutbox[s],
-      mytextclock,
       volume_display,
       battery_textbox,
-      s == 1 and mysystray or nil,
-      mytasklist[s],
+      meminfo,
+--      s == 1 and mysystray or nil,
+      mytaglist[s],
+      mypromptbox[s],
       layout = awful.widget.layout.horizontal.rightleft
    }
 end
@@ -150,10 +202,12 @@ end
 function wibox_top_init(s)
    wibox_top[s] = awful.wibox({ position = "top", screen = s })
    wibox_top[s].widgets = {
-      mytaglist[s],
-      mypromptbox[s],
-      titlebar[s],
-      layout = awful.widget.layout.horizontal.leftright
+      mytextclock,
+      s == 1 and mysystray or nil,
+      -- mytaglist[s],
+      mytasklist[s],
+      -- titlebar[s],
+      layout = awful.widget.layout.horizontal.rightleft
    }
 end
 
@@ -161,6 +215,7 @@ taglist_init_buttons()
 tasklist_init_buttons()
 battery_widget_init()
 volume_widget_init()
+meminfo_init()
 
 for s = 1, screen.count() do
    promptbox_init(s)
@@ -175,4 +230,3 @@ wiboxes['bottom'] = wibox_bottom
 wiboxes['top'] = wibox_top
 
 -- }}}
-

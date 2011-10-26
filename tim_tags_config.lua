@@ -2,6 +2,16 @@
 -- Custom functions
 --
 
+function tim_tag_notify(title, msg)
+   naughty.notify({ text = msg,
+                    title = title,
+                    fg = "#ffggcc",
+                    bg = "#bbggcc",
+                    ontop = false,
+                    timeout = 1
+                 })
+end
+
 function tim_table_indexOf(table, item)
    table = table or {}
    for i = 1, #table do
@@ -33,18 +43,18 @@ function timTagViewToggle(screen, tag)
           end
 end
 -- Move client to tag
-function timMoveClientToTag(tag)
+function timMoveClientToTag(screen, tag)
    return function (c)
-             if client.focus and tags[client.focus.screen][tag] then
-                awful.client.movetotag(tags[client.focus.screen][tag])
+             if client.focus and tags[screen][tag] then
+                awful.client.movetotag(tags[screen][tag])
              end
           end
 end
 -- Toggle tag for a client
-function timToggleTag(tag)
+function timToggleTag(screen, tag)
    return function (c)
-             if client.focus and tags[client.focus.screen][tag] then
-                awful.client.toggletag(tags[client.focus.screen][tag])
+             if client.focus and tags[screen][tag] then
+                awful.client.toggletag(tags[screen][tag])
              end
           end
 end
@@ -86,7 +96,7 @@ layouts = {
 -- My custom tags
 timTagsInitial = { "m", "e", "p", "w", "o",
                    "i", "a", "c", "b", "g",
-                   "r", "s", "t" }
+                   "r", "s", "l", "t" }
 
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
@@ -95,11 +105,11 @@ tags = {
    -- names = { "main", "www", "office", "im", "background", "coding",
    --        "browser", "graphics", "tmp" },
    names = timTagsInitial,
-   layout = { layouts[3], layouts[2], layouts[2],
-              layouts[11], layouts[2], layouts[1],
-              layouts[1], layouts[11], layouts[11],
-              layouts[2],  layouts[3], layouts[3],
-              layouts[1]
+   layout = { layouts[3],  layouts[11],  layouts[11],
+              layouts[11], layouts[1],   layouts[3],
+              layouts[1],  layouts[5],   layouts[11],
+              layouts[1],  layouts[11],  layouts[11],
+              layouts[1],  layouts[1]
            }
 }
 
@@ -112,27 +122,96 @@ end
 
 -- Key bindings
 --
+-- Modal mode for tags keybinding
+--
+
+modaltagkeys = {}
+
+modaltagkeys = {
+   -- Switch to tagw
+   m = function(screen_num, c) timTagViewOnly(screen_num, 1)(c) end,
+   e = function(screen_num, c) timTagViewOnly(screen_num, 2)(c) end,
+   p = function(screen_num, c) timTagViewOnly(screen_num, 3)(c) end,
+   w = function(screen_num, c) timTagViewOnly(screen_num, 4)(c) end,
+   o = function(screen_num, c) timTagViewOnly(screen_num, 5)(c) end,
+   i = function(screen_num, c) timTagViewOnly(screen_num, 6)(c) end,
+   a = function(screen_num, c) timTagViewOnly(screen_num, 7)(c) end,
+   c = function(screen_num, c) timTagViewOnly(screen_num, 8)(c) end,
+   b = function(screen_num, c) timTagViewOnly(screen_num, 9)(c) end,
+   g = function(screen_num, c) timTagViewOnly(screen_num, 10)(c) end,
+   r = function(screen_num, c) timTagViewOnly(screen_num, 11)(c) end,
+   s = function(screen_num, c) timTagViewOnly(screen_num, 12)(c) end,
+   l = function(screen_num, c) timTagViewOnly(screen_num, 13)(c) end,
+   t = function(screen_num, c) timTagViewOnly(screen_num, 14)(c) end,
+   -- Toggle tags
+   M = function(screen_num, c) timTagViewToggle(screen_num, 1)(c) end,
+   E = function(screen_num, c) timTagViewToggle(screen_num, 2)(c) end,
+   P = function(screen_num, c) timTagViewToggle(screen_num, 3)(c) end,
+   W = function(screen_num, c) timTagViewToggle(screen_num, 4)(c) end,
+   O = function(screen_num, c) timTagViewToggle(screen_num, 5)(c) end,
+   I = function(screen_num, c) timTagViewToggle(screen_num, 6)(c) end,
+   A = function(screen_num, c) timTagViewToggle(screen_num, 7)(c) end,
+   C = function(screen_num, c) timTagViewToggle(screen_num, 8)(c) end,
+   B = function(screen_num, c) timTagViewToggle(screen_num, 9)(c) end,
+   G = function(screen_num, c) timTagViewToggle(screen_num, 10)(c) end,
+   R = function(screen_num, c) timTagViewToggle(screen_num, 11)(c) end,
+   S = function(screen_num, c) timTagViewToggle(screen_num, 12)(c) end,
+   L = function(screen_num, c) timTagViewToggle(screen_num, 13)(c) end,
+   T = function(screen_num, c) timTagViewToggle(screen_num, 14)(c) end
+}
+
 -- Bind all key numbers to tags.
 --
 
 globalkeys = globalkeys or { }
 
-for i = 1, #timTagsInitial do
-   globalkeys = awful.util.table.join(
-      globalkeys,
-      -- Switch to tag
-      awful.key({ modkey, "Mod1" }, timTagsInitial[i],
-                timTagViewOnly(mouse.screen, i)),
-      -- View tag
-      awful.key({ modkey, "Shift" }, timTagsInitial[i],
-                timTagViewToggle(mouse.screen, i)),
-      -- Move to tag
-      awful.key({ modkey, "Shift", "Mod1" }, timTagsInitial[i],
-                timMoveClientToTag(i)),
-      -- Toggle tag-name for the client
-      awful.key({ modkey, "Shift", "Control", "Mod1" }, timTagsInitial[i],
-                timToggleTag(i))
-   )
+-- Bind the modal mode
+globalkeys = awful.util.table.join(
+   globalkeys,
+   awful.key({ modkey, "Control" }, "space",
+             function (c)
+                keygrabber.run(
+                   function (mod, key, event)
+                      if string.find(key, "Super") then
+                         tim_tag_notify("Modal mode",
+                                        "Waiting for the next key...")
+                      end
+
+                      if event == "release" then
+                         return true
+                      end
+
+                      if not string.find(key, "Shift") then
+                         keygrabber.stop()
+                      end
+
+                      if modaltagkeys[key] then
+                         modaltagkeys[key](1, c)
+                      end
+                      return true
+                   end)
+             end
+          )
+)
+
+for screen_num = 1, screen.count() do
+   for i = 1, #timTagsInitial do
+      globalkeys = awful.util.table.join(
+         globalkeys,
+         -- -- Switch to tagw
+         -- awful.key({ modkey, "Mod1" }, timTagsInitial[i],
+         --           timTagViewOnly(screen_num, i)),
+         -- View tag
+         awful.key({ modkey, "Shift" }, timTagsInitial[i],
+                   timTagViewToggle(screen_num, i)),
+         -- Move to tag
+         awful.key({ modkey, "Shift", "Mod1" }, timTagsInitial[i],
+                   timMoveClientToTag(screen_num, i)),
+         -- Toggle tag-name for the client
+         awful.key({ modkey, "Shift", "Control", "Mod1" }, timTagsInitial[i],
+                   timToggleTag(screen_num, i))
+      )
+   end
 end
 
 --
@@ -141,8 +220,19 @@ end
 
 clientkeys = clientkeys or {}
 clientkeys = awful.util.table.join(
+   -- Titlebar
+   awful.key( { modkey }, ",",
+              function (c)
+                 if c.titlebar then
+                    awful.titlebar.remove(c)
+                    debug_notify(c.name .. "\ntitlebar " .. colored_off)
+                 else
+                    awful.titlebar.add(c, { altkey = "Mod1" })
+                    debug_notify(c.name .. "\ntitlebar " .. colored_on)
+                 end
+              end),
    -- Fullscreen
-   awful.key({ modkey,           }, "f",
+   awful.key({ modkey           }, "f",
              function (c) c.fullscreen = not c.fullscreen  end),
    -- Kill
    awful.key({ modkey            }, "x",
@@ -151,7 +241,7 @@ clientkeys = awful.util.table.join(
    awful.key({ modkey, "Control" }, "space",
              awful.client.floating.toggle                     ),
    -- Swap with masters
-   awful.key({ modkey,           }, "Return",
+   awful.key({ modkey, "Shift"   }, "Return",
              function (c) c:swap(awful.client.getmaster()) end),
    -- Move to screen
    awful.key({ modkey,           }, "o",
@@ -244,6 +334,10 @@ awful.rules.rules = {
    { rule = { class = "Gimp" },
      properties = { floating = true,
                     tag = tags[mouse.screen][tim_findTag("g")] } },
+   { rule = { class = "Xsane" },
+     properties = { floating = true } },
+   { rule = { class = "Inferno" },
+     properties = { floating = true } },
    { rule = { class = "Cinelerra" },
      properties = { floating = true,
                     tag = tags[mouse.screen][tim_findTag("g")] } },
@@ -258,7 +352,7 @@ awful.rules.rules = {
    -- Set Firefox to always map on tags number 2 of screen 1.
    { rule = { class = "Firefox" },
      properties = { tag = tags[mouse.screen][tim_findTag("w")] } },
-   { rule = { class = "Chromium" },
+   { rule = { class = "Chrome" },
      properties = { tag = tags[mouse.screen][tim_findTag("w")] } },
    { rule = { class = "Seamonkey" },
      properties = { tag = tags[mouse.screen][tim_findTag("w")] } },
@@ -274,8 +368,8 @@ awful.rules.rules = {
      properties = { tag = tags[mouse.screen][tim_findTag("g")] } },
    { rule = { class = "Vuze" },
      properties = { tag = tags[mouse.screen][tim_findTag("t")] } },
-   { rule = { class = "Nautilus" },
-     properties = { tag = tags[mouse.screen][tim_findTag("b")] } },
+   -- { rule = { class = "Nautilus" },
+   --   properties = { tag = tags[mouse.screen][tim_findTag("b")] } },
    { rule = { class = "Krusader" },
      properties = { tag = tags[mouse.screen][tim_findTag("b")] } },
    { rule = { class = "emelFM2" },
