@@ -1,10 +1,12 @@
-function tim_tag_notify(title, msg)
-   naughty.notify({ text = msg,
-                    title = title,
-                    fg = "#ffggcc",
-                    bg = "#bbggcc",
-                    ontop = false,
-                    timeout = 1 })
+function showNotification(title, msg)
+   naughty.notify({
+                     text = msg,
+                     title = title,
+                     fg = "#ffggcc",
+                     bg = "#bbggcc",
+                     ontop = false,
+                     timeout = 1
+                  })
 end
 
 function runApp(cmd)
@@ -27,6 +29,7 @@ require("tim_wibox")
 appKeys = {
    e = runApp("tim_edit"),
    m = runApp("run_alpine"),
+   s = runApp("monitor_off"),
    d = runApp("stardict"),
    r = runApp("gksudo emacs"),
    t = runApp("thunar"),
@@ -44,9 +47,9 @@ appKeys = {
 -- These are the factors for "centralizing" a windowe.
 -- Change these according to your need.
 --
-local width_factor = 8 / 9
-local height_factor = 8 / 9
-local taskbar_height = 25
+local width_factor = 11 / 12
+local height_factor = 9 / 10
+local taskbar_height = 24
 
 -- My wibox
 wiboxes = wiboxes
@@ -257,7 +260,7 @@ globalkeys = awful.util.table.join(
                 keygrabber.run(
                    function (mod, key, event)
                       if string.find(key, "Super") then
-                         tim_tag_notify(
+                         showNotification(
                             "Application mode",
                             "Press a key to start an application...")
                       end
@@ -354,11 +357,60 @@ globalkeys = awful.util.table.join(
 --
 -- Centralize a window
 function tim_centralize(c)
-   local current_geometry = screen[c.screen].geometry
+   local current_geometry = screen[mouse.screen].geometry
    local new_width = current_geometry.width * width_factor
    local new_height = current_geometry.height * height_factor
    local new_x = (current_geometry.width - new_width) / 2
-   local new_y = ((current_geometry.height - taskbar_height) - new_height) / 2
+   local new_y = ((current_geometry.height - taskbar_height / 2) - new_height) / 2
+   return { new_width = new_width,
+            new_height = new_height,
+            new_x = new_x, new_y = new_y }
+end
+--
+-- Half max width
+function tim_halfmaxwidth(c)
+   local current_geometry = screen[mouse.screen].geometry
+   local new_width = current_geometry.width / 2
+   local new_height = c.height
+   local new_x = c:geometry({}).x
+   local new_y = c:geometry({}).y
+   c.screen = mouse.screen
+   return { new_width = new_width,
+            new_height = new_height,
+            new_x = new_x, new_y = new_y }
+end
+--
+-- Half max height
+function tim_halfmaxheight(c)
+   local current_geometry = screen[c.screen].geometry
+   local new_width = c.width
+   local new_height = current_geometry.height / 2
+   local new_x = c:geometry({}).x
+   local new_y = c:geometry({}).y
+   return { new_width = new_width,
+            new_height = new_height,
+            new_x = new_x, new_y = new_y }
+end
+--
+-- Left full
+function tim_leftfull(c)
+   local current_geometry = screen[c.screen].geometry
+   local new_width = current_geometry.width / 2
+   local new_height = current_geometry.height - 2 * taskbar_height
+   local new_x = 0
+   local new_y = taskbar_height + 3
+   return { new_width = new_width,
+            new_height = new_height,
+            new_x = new_x, new_y = new_y }
+end
+--
+-- Right full
+function tim_rightfull(c)
+   local current_geometry = screen[c.screen].geometry
+   local new_width = current_geometry.width / 2
+   local new_height = current_geometry.height - 2 * taskbar_height
+   local new_x = current_geometry.width / 2
+   local new_y = taskbar_height + 3
    return { new_width = new_width,
             new_height = new_height,
             new_x = new_x, new_y = new_y }

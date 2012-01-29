@@ -177,7 +177,7 @@ end
 
 function wibox_bottom_init(s)
    wibox_bottom[s] = awful.wibox({ position = "bottom",
-                                   height = 20,
+                                   height = 22,
                                    screen = s })
    -- wibox_bottom[s] = awful.wibox({ position = "left",
    --                                 align = "right",
@@ -193,19 +193,22 @@ function wibox_bottom_init(s)
       battery_textbox,
       meminfo,
 --      s == 1 and mysystray or nil,
-      mytaglist[s],
+--      mytaglist[s],
+      mytasklist[s],
       mypromptbox[s],
       layout = awful.widget.layout.horizontal.rightleft
    }
 end
 
 function wibox_top_init(s)
-   wibox_top[s] = awful.wibox({ position = "top", screen = s })
+   wibox_top[s] = awful.wibox({ position = "top",
+                                height = 22,
+                                screen = s })
    wibox_top[s].widgets = {
       mytextclock,
       s == 1 and mysystray or nil,
-      -- mytaglist[s],
-      mytasklist[s],
+      mytaglist[s],
+--      mytasklist[s],
       -- titlebar[s],
       layout = awful.widget.layout.horizontal.rightleft
    }

@@ -2,21 +2,7 @@
 -- Custom functions
 --
 
-function getTagsAbbr(tag_names)
-   local ret = {}
-   for idx = 1, #tag_names do
-      ret[idx] = string.lower(string.sub(tag_names[idx], 1, 1))
-   end
-   return ret
-end
-
-function giveFocus(c)
-   c.screen = mouse.screen -- dirty fix for strange screen changing behaviour
-   client.focus = c
-   c:raise()
-end
-
-function showNotification(title, msg)
+function tim_tag_notify(title, msg)
    naughty.notify({ text = msg,
                     title = title,
                     fg = "#ffggcc",
@@ -29,7 +15,7 @@ end
 function tim_table_indexOf(table, item)
    table = table or {}
    for i = 1, #table do
-      if string.find(string.lower(table[i]), item) then
+      if table[i] == item then
          return i
       end
    end
@@ -37,12 +23,16 @@ function tim_table_indexOf(table, item)
 end
 
 function tim_findTag(name)
-   return tim_table_indexOf(tags.settings[mouse.screen].names, name)
+   return tim_table_indexOf(timTagsInitial, name)
 end
 
 -- Switch to tag
 function timTagViewOnly(screen, tag)
    return function (c)
+
+             -- Testing
+             screen = mouse.screen
+
              if tags[screen][tag] then
                 awful.tag.viewonly(tags[screen][tag])
              end
@@ -51,6 +41,10 @@ end
 -- Toggle tag view
 function timTagViewToggle(screen, tag)
    return function (c)
+
+             -- Testing
+             screen = mouse.screen
+
              if tags[screen][tag] then
                 awful.tag.viewtoggle(tags[screen][tag])
              end
@@ -59,6 +53,10 @@ end
 -- Move client to tag
 function timMoveClientToTag(screen, tag)
    return function (c)
+
+             -- Testing
+             screen = mouse.screen
+
              if client.focus and tags[screen][tag] then
                 awful.client.movetotag(tags[screen][tag])
              end
@@ -67,6 +65,10 @@ end
 -- Toggle tag for a client
 function timToggleTag(screen, tag)
    return function (c)
+
+             -- Testing
+             screen = mouse.screen
+
              if client.focus and tags[screen][tag] then
                 awful.client.toggletag(tags[screen][tag])
              end
@@ -94,74 +96,44 @@ layoutCommon = {
 
 layouts = {
    awful.layout.suit.floating,
-   awful.layout.suit.tile,
-   awful.layout.suit.tile.bottom,
    awful.layout.suit.magnifier,
-   awful.layout.suit.max.fullscreen,
-   awful.layout.suit.max
+   awful.layout.suit.tile,
+   awful.layout.suit.tile.left,
+   awful.layout.suit.tile.bottom,
+   awful.layout.suit.tile.top,
+   awful.layout.suit.fair,
+   awful.layout.suit.fair.horizontal,
+   awful.layout.suit.spiral,
+   awful.layout.suit.spiral.dwindle,
+   awful.layout.suit.max,
+   awful.layout.suit.max.fullscreen
 }
 
--- {{{ My custom tags
---
-
--- For screen 1
-
--- tags_screen1 = {
---    "m", "c", "w", "o",
---    "b", "i", "f", "t"
--- }
-
-tags_screen1 = {
-   "Main", "Console", "WWW", "Other",
-   "Browser", "IM", "Floating", "Temp"
-}
-
-
-layouts_screen1 = {
-   layouts[2],  layouts[6],  layouts[1], layouts[1],
-   layouts[1],  layouts[1],  layouts[1], layouts[1]
-}
-
--- For screen 2
-
-tags_screen2 = { "Main", "Read", "WWW", "Other" }
-
-layouts_screen2 = {
-   layouts[1], layouts[1], layouts[1], layouts[1]
-}
-
---- }}}
+-- My custom tags
+timTagsInitial = { "m", "e", "p", "w", "o",
+                   "i", "a", "c", "b", "g",
+                   "r", "s", "l", "t" }
 
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
 
-tags = {}
-
 tags = {
-   settings = {
-      {
-         names = tags_screen1,
-         layout = layouts_screen1
-      },
-      {
-         names = tags_screen2,
-         layout = layouts_screen2
-      }
-   }
+   -- names = { "main", "www", "office", "im", "background", "coding",
+   --        "browser", "graphics", "tmp" },
+   names = timTagsInitial,
+   layout = { layouts[3],  layouts[1],  layouts[1],
+              layouts[1], layouts[1],   layouts[1],
+              layouts[1],  layouts[5],   layouts[1],
+              layouts[1],  layouts[11],  layouts[11],
+              layouts[1],  layouts[1]
+           }
 }
 
 -- Create tags for all screens
--- -- Tag table for screen 1
--- tags[1] = awful.tag(tags.names, 1, tags.layout)
--- -- Tag table for screen 2
--- tags[2] = awful.tag(tags)
-
 for s = 1, screen.count() do
-   tags[s] = awful.tag(tags.settings[s].names,
-                       s,
-                       tags.settings[s].layout)
+   -- Each screen has its own tag table
+   tags[s] = awful.tag(tags.names, s, tags.layout)
 end
-
 -- }}}
 
 -- Key bindings
@@ -174,23 +146,34 @@ modaltagkeys = {}
 modaltagkeys = {
    -- Switch to tagw
    m = function(screen_num, c) timTagViewOnly(screen_num, 1)(c) end,
-   c = function(screen_num, c) timTagViewOnly(screen_num, 2)(c) end,
-   w = function(screen_num, c) timTagViewOnly(screen_num, 3)(c) end,
-   o = function(screen_num, c) timTagViewOnly(screen_num, 4)(c) end,
-   b = function(screen_num, c) timTagViewOnly(screen_num, 5)(c) end,
+   e = function(screen_num, c) timTagViewOnly(screen_num, 2)(c) end,
+   p = function(screen_num, c) timTagViewOnly(screen_num, 3)(c) end,
+   w = function(screen_num, c) timTagViewOnly(screen_num, 4)(c) end,
+   o = function(screen_num, c) timTagViewOnly(screen_num, 5)(c) end,
    i = function(screen_num, c) timTagViewOnly(screen_num, 6)(c) end,
-   f = function(screen_num, c) timTagViewOnly(screen_num, 7)(c) end,
-   t = function(screen_num, c) timTagViewOnly(screen_num, 8)(c) end,
-
+   a = function(screen_num, c) timTagViewOnly(screen_num, 7)(c) end,
+   c = function(screen_num, c) timTagViewOnly(screen_num, 8)(c) end,
+   b = function(screen_num, c) timTagViewOnly(screen_num, 9)(c) end,
+   g = function(screen_num, c) timTagViewOnly(screen_num, 10)(c) end,
+   r = function(screen_num, c) timTagViewOnly(screen_num, 11)(c) end,
+   s = function(screen_num, c) timTagViewOnly(screen_num, 12)(c) end,
+   l = function(screen_num, c) timTagViewOnly(screen_num, 13)(c) end,
+   t = function(screen_num, c) timTagViewOnly(screen_num, 14)(c) end,
    -- Toggle tags
    M = function(screen_num, c) timTagViewToggle(screen_num, 1)(c) end,
-   C = function(screen_num, c) timTagViewToggle(screen_num, 2)(c) end,
-   W = function(screen_num, c) timTagViewToggle(screen_num, 3)(c) end,
-   O = function(screen_num, c) timTagViewToggle(screen_num, 4)(c) end,
-   B = function(screen_num, c) timTagViewToggle(screen_num, 5)(c) end,
+   E = function(screen_num, c) timTagViewToggle(screen_num, 2)(c) end,
+   P = function(screen_num, c) timTagViewToggle(screen_num, 3)(c) end,
+   W = function(screen_num, c) timTagViewToggle(screen_num, 4)(c) end,
+   O = function(screen_num, c) timTagViewToggle(screen_num, 5)(c) end,
    I = function(screen_num, c) timTagViewToggle(screen_num, 6)(c) end,
-   F = function(screen_num, c) timTagViewToggle(screen_num, 7)(c) end,
-   T = function(screen_num, c) timTagViewToggle(screen_num, 8)(c) end
+   A = function(screen_num, c) timTagViewToggle(screen_num, 7)(c) end,
+   C = function(screen_num, c) timTagViewToggle(screen_num, 8)(c) end,
+   B = function(screen_num, c) timTagViewToggle(screen_num, 9)(c) end,
+   G = function(screen_num, c) timTagViewToggle(screen_num, 10)(c) end,
+   R = function(screen_num, c) timTagViewToggle(screen_num, 11)(c) end,
+   S = function(screen_num, c) timTagViewToggle(screen_num, 12)(c) end,
+   L = function(screen_num, c) timTagViewToggle(screen_num, 13)(c) end,
+   T = function(screen_num, c) timTagViewToggle(screen_num, 14)(c) end
 }
 
 -- Bind all key numbers to tags.
@@ -202,13 +185,12 @@ globalkeys = globalkeys or { }
 globalkeys = awful.util.table.join(
    globalkeys,
    awful.key({ modkey, "Control" }, "space",
-             -- {{{ Modal mode
              function (c)
                 keygrabber.run(
                    function (mod, key, event)
                       if string.find(key, "Super") then
-                         showNotification("Modal mode",
-                                          "Waiting for the next key...")
+                         tim_tag_notify("Modal mode",
+                                        "Waiting for the next key...")
                       end
 
                       if event == "release" then
@@ -220,29 +202,30 @@ globalkeys = awful.util.table.join(
                       end
 
                       if modaltagkeys[key] then
-                         modaltagkeys[key](mouse.screen, c)
+                         modaltagkeys[key](1, c)
                       end
                       return true
                    end)
              end
-             -- }}}
           )
 )
 
-for screen_idx = 1, screen.count() do
-   local tag_names = getTagsAbbr(tags.settings[screen_idx].names)
-   for i = 1, #tag_names do
+for screen_num = 1, screen.count() do
+   for i = 1, #timTagsInitial do
       globalkeys = awful.util.table.join(
          globalkeys,
+         -- -- Switch to tagw
+         -- awful.key({ modkey, "Mod1" }, timTagsInitial[i],
+         --           timTagViewOnly(screen_num, i)),
          -- View tag
-         awful.key({ modkey, "Shift" }, tag_names[i],
-                   timTagViewToggle(screen_idx, i)),
+         awful.key({ modkey, "Shift" }, timTagsInitial[i],
+                   timTagViewToggle(screen_num, i)),
          -- Move to tag
-         awful.key({ modkey, "Shift", "Mod1" }, tag_names[i],
-                   timMoveClientToTag(screen_idx, i)),
+         awful.key({ modkey, "Shift", "Mod1" }, timTagsInitial[i],
+                   timMoveClientToTag(screen_num, i)),
          -- Toggle tag-name for the client
-         awful.key({ modkey, "Shift", "Control", "Mod1" }, tag_names[i],
-                   timToggleTag(screen_idx, i))
+         awful.key({ modkey, "Shift", "Control", "Mod1" }, timTagsInitial[i],
+                   timToggleTag(screen_num, i))
       )
    end
 end
@@ -274,7 +257,7 @@ clientkeys = awful.util.table.join(
    awful.key({ modkey            }, "x",
              function (c) c:kill()                         end),
    -- Toggle floating
-   awful.key({ modkey, "Control", "Mod1" }, "space",
+   awful.key({ modkey, "Control" }, "space",
              awful.client.floating.toggle                     ),
    -- Swap with masters
    awful.key({ modkey, "Shift"   }, "Return",
@@ -298,22 +281,12 @@ clientkeys = awful.util.table.join(
    -- Bigger
    awful.key({ modkey, }, "End",
              function ()
-                awful.client.moveresize(0, 0, 0, 20)
+                awful.client.moveresize(0, 0, 20, 20)
              end),
    -- Smaller
    awful.key({ modkey, }, "Home",
              function ()
-                awful.client.moveresize(0, 0, 0, -20)
-             end),
-   --
-   awful.key({ modkey, }, "Prior",
-             function ()
-                awful.client.moveresize(0, 0, -20, 0)
-             end),
-   --
-   awful.key({ modkey, }, "Next",
-             function ()
-                awful.client.moveresize(0, 0, 20, 0)
+                awful.client.moveresize(0, 0, -20, -20)
              end),
    -- Increase transparency
    awful.key({ modkey, "Mod1", "Shift" }, "Down",
@@ -355,35 +328,40 @@ clientkeys = awful.util.table.join(
                 local tmp = tim_centralize(c)
                 c:geometry({ x = tmp.new_x, y = tmp.new_y,
                              width = tmp.new_width, height = tmp.new_height })
-                giveFocus(c)
+                c.screen = mouse.screen -- dirty fix for strange screen changing behaviour
+                -- awful.client.property.set(c, "geometry", { width=800, height=600 })
              end),
    awful.key({ modkey, "Control"          }, "t",
              function (c)
                 local tmp = tim_halfmaxwidth(c)
                 c:geometry({ x = tmp.new_x, y = tmp.new_y,
                              width = tmp.new_width, height = tmp.new_height })
-                giveFocus(c)
+                c.screen = mouse.screen -- dirty fix for strange screen changing behaviour
+                -- awful.client.property.set(c, "geometry", { width=800, height=600 })
              end),
    awful.key({ modkey, "Control"          }, "n",
              function (c)
                 local tmp = tim_halfmaxheight(c)
                 c:geometry({ x = tmp.new_x, y = tmp.new_y,
                              width = tmp.new_width, height = tmp.new_height })
-                giveFocus(c)
+                c.screen = mouse.screen -- dirty fix for strange screen changing behaviour
+                -- awful.client.property.set(c, "geometry", { width=800, height=600 })
              end),
    awful.key({ modkey, "Control"          }, "Left",
              function (c)
                 local tmp = tim_leftfull(c)
                 c:geometry({ x = tmp.new_x, y = tmp.new_y,
                              width = tmp.new_width, height = tmp.new_height })
-                giveFocus(c)
+                c.screen = mouse.screen -- dirty fix for strange screen changing behaviour
+                -- awful.client.property.set(c, "geometry", { width=800, height=600 })
              end),
    awful.key({ modkey, "Control"          }, "Right",
              function (c)
                 local tmp = tim_rightfull(c)
                 c:geometry({ x = tmp.new_x, y = tmp.new_y,
                              width = tmp.new_width, height = tmp.new_height })
-                giveFocus(c)
+                c.screen = mouse.screen -- dirty fix for strange screen changing behaviour
+                -- awful.client.property.set(c, "geometry", { width=800, height=600 })
              end)
 
 )
@@ -408,14 +386,15 @@ awful.rules.rules = {
      properties = { floating = true } },
    { rule = { class = "Gimp" },
      properties = { floating = true,
-                    tag = tags[mouse.screen][tim_findTag("f")] } },
+                    screen = mouse.screen,
+                    tag = tags[mouse.screen][tim_findTag("g")] } },
    { rule = { class = "Xsane" },
      properties = { floating = true } },
    { rule = { class = "Inferno" },
      properties = { floating = true } },
    { rule = { class = "Cinelerra" },
      properties = { floating = true,
-                    tag = tags[mouse.screen][tim_findTag("f")] } },
+                    tag = tags[mouse.screen][tim_findTag("g")] } },
    -- { rule = { class = "Audacity" },
    --   properties = { floating = true,
    --                  tag = tags[mouse.screen][5] } },
@@ -439,8 +418,14 @@ awful.rules.rules = {
      properties = { tag = tags[mouse.screen][tim_findTag("i")] } },
    { rule = { class = "Skype" },
      properties = { tag = tags[mouse.screen][tim_findTag("i")] } },
+   { rule = { class = "Kdenlive" },
+     properties = { tag = tags[mouse.screen][tim_findTag("g")] } },
+   { rule = { class = "Vuze" },
+     properties = { tag = tags[mouse.screen][tim_findTag("t")] } },
    -- { rule = { class = "Nautilus" },
    --   properties = { tag = tags[mouse.screen][tim_findTag("b")] } },
+   { rule = { class = "Krusader" },
+     properties = { tag = tags[mouse.screen][tim_findTag("b")] } },
    { rule = { class = "emelFM2" },
      properties = { tag = tags[mouse.screen][tim_findTag("b")] } }
 }

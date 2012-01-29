@@ -1,14 +1,14 @@
 --
 -- Created by Dương Yang Hà Nguyễn <cmpitg@gmail.com>
--- Last modified: Fri, 05 Nov 2010 16:56:15 +0700
+-- Last modified: 10 Jan 2012 00:21:13 +0700
 --
 -- My configuration files are heavily commented.  Feel free to adopt
 -- them according to your need.  Mail me if you have any difficulties
 -- modifying them, I'm willing to help.
 --
 -- Don't send me ugly code.  Format it, make it clear and elegant.  I
--- hate ugly and bad code.  I have the beautiful programs.  Programs
--- shape the way you think, thus, make it as elegant as you can.
+-- hate ugly and bad code.  I love beautiful programs.  Programs shape
+-- the way you think, thus, make it as elegant as you can.
 --
 
 require("awful")

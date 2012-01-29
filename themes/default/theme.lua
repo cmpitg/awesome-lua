@@ -85,7 +85,8 @@ theme.titlebar_maximized_button_focus_active  = "/usr/share/awesome/themes/defau
 
 -- You can use your own command to set your wallpaper
 -- theme.wallpaper_cmd = { "awsetbg /home/cmpitg/.config/awesome/themes/default/background.png" }
-theme.wallpaper_cmd = { "awsetbg /home/cmpitg/Pictures/Wallpapers/gentoo_wall.png" }
+-- theme.wallpaper_cmd = { "awsetbg /home/cmpitg/Pictures/Wallpapers/gentoo_wall.png" }
+theme.wallpaper_cmd = { "awsetbg /home/cmpitg/.config/awesome/themes/default/background_2.png" }
 
 -- You can use your own layout icons like this:
 theme.layout_fairh = "/usr/share/awesome/themes/default/layouts/fairhw.png"
